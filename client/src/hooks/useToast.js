@@ -8,7 +8,7 @@ export default function useToast({
     alertType,
     message,
     clearAlertAction,
-    autoClose = 1500,
+    autoClose = 2000,
     toastOptions = {},
 }) {
     const dispatch = useDispatch();

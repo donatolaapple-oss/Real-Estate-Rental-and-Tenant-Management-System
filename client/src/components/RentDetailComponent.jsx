@@ -21,7 +21,7 @@ const RentDetailComponent = ({
   tenant,
   realEstate,
   paymentPlan,
-  currentRentDate,
+  nextRentDate,
 }) => {
 
   const currentCountry = countries.find(
@@ -71,11 +71,11 @@ const RentDetailComponent = ({
             <div className="mt-2">
               <p className="font-robotoNormal">
                 <span className="font-medium">Current Rent Date:</span>{" "}
-                {dateFormatter(currentRentDate?.from)}
+                {dateFormatter(nextRentDate?.from)}
               </p>
               <p className="font-robotoNormal">
                 <span className="font-medium">Next Rent Due:</span>{" "}
-                {dateFormatter(calculateNextDueDate(currentRentDate?.to))}
+                {dateFormatter(calculateNextDueDate(nextRentDate?.to))}
               </p>
               <p className="font-robotoNormal">
                 <span className="font-medium">Payment Plan:</span> {paymentPlan}

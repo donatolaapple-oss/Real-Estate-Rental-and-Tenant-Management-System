@@ -167,6 +167,7 @@ const authSlice = createSlice({
     clearAlert: (state) => {
       state.errorFlag = false;
       state.errorMsg = "";
+      state.success = false;
     },
     createAlert: (state, action) => {
       state.errorFlag = true;

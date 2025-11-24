@@ -126,13 +126,13 @@ const RentDetailTenantPage = () => {
               </p>
               <p className="font-robotoNormal">
                 <span className="font-medium">Current Rent Date:</span>{" "}
-                {moment(rentDetail?.currentRentDate.from).format("MMM Do")} -{" "}
-                {dateFormatter(rentDetail?.currentRentDate.to)}
+                {moment(rentDetail?.nextRentDate.from).format("MMM Do")} -{" "}
+                {dateFormatter(rentDetail?.nextRentDate.to)}
               </p>
               <p className="font-robotoNormal">
-                <span className="font-medium">Next Rent Due:</span>{" "}
+                <span className="font-medium">Rent Due:</span>{" "}
                 {dateFormatter(
-                  calculateNextDueDate(rentDetail?.currentRentDate.to)
+                  rentDetail?.nextRentDate.from
                 )}
               </p>
               <p className="font-robotoNormal">

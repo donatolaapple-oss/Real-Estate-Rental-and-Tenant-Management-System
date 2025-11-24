@@ -6,7 +6,7 @@ export const createRentDetail = createAsyncThunk(
   async ({ formData }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.post(
-        "/rentDetail/createDetail",
+        "/rentDetailOwner/createDetail",
         formData
       );
       return await data;
@@ -20,7 +20,7 @@ export const getAllRentDetailsOwnerView = createAsyncThunk(
   "getAllRentDetailsOwnerView",
   async (arg, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get("/rentDetail/allRentDetails");
+      const { data } = await axiosFetch.get("/rentDetailOwner/allRentDetails");
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -32,7 +32,7 @@ export const getSingleRentDetailOwnerView = createAsyncThunk(
   "getSingleRentDetailOwnerView",
   async ({ rentDetailId }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get(`/rentDetail/${rentDetailId}`);
+      const { data } = await axiosFetch.get(`/rentDetailOwner/${rentDetailId}`);
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -57,7 +57,7 @@ export const createPaymentHistory = createAsyncThunk(
   async ({ formData }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.post(
-        "/rentDetail/createPaymentHistory",
+        "/rentDetailOwner/createPaymentHistory",
         formData
       );
       return await data;
@@ -71,7 +71,7 @@ export const getAllPaymentHistory = createAsyncThunk(
   "getAllPaymentHistoryOwner",
   async ({ rentDetailId, page }, thunkAPI) => {
     try {
-      let url = `/rentDetail/allPaymentHistory/${rentDetailId}?page=${page}`;
+      let url = `/rentDetailOwner/allPaymentHistory/${rentDetailId}?page=${page}`;
       const { data } = await axiosFetch.get(url);
       return await data;
     } catch (error) {
@@ -99,6 +99,7 @@ const rentDetailOwnerSlice = createSlice({
     clearAlert: (state) => {
       state.alertFlag = false;
       state.alertMsg = "";
+      state.success = false;
     },
   },
   extraReducers: (builder) => {

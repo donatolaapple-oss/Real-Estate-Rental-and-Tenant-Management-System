@@ -36,7 +36,7 @@ const RentDetailSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide a start date"],
     },
-    currentRentDate: {
+    nextRentDate: {
       from: {
         type: String,
         required: [true, "Please provide a start date"],
@@ -49,12 +49,5 @@ const RentDetailSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-//check if rent is paid for current month
-RentDetailSchema.methods.isRentPaid = async function () {
-  const rentDeadline = new Date(this.currentRentDate.to);
-  const today = new Date();
-  return today <= rentDeadline;
-};
 
 export default mongoose.model("RentDetail", RentDetailSchema);

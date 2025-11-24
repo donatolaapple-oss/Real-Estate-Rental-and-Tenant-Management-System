@@ -171,6 +171,7 @@ const ownerUserSlice = createSlice({
     clearAlert: (state) => {
       state.alertFlag = false;
       state.alertMsg = "";
+      state.success = false;
     },
     addOwnerRecentMessage: (state, action) => {
       const { chatId, message, sender } = action.payload;

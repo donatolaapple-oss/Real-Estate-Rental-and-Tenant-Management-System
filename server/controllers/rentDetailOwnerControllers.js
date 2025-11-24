@@ -6,7 +6,7 @@ import { NotFoundError, BadRequestError } from "../request-errors/index.js";
 
 /**
  * @description Create Lease
- * @route POST /api/rentDetail/createDetail
+ * @route POST /api/rentDetailOwner/createDetail
  * @returns {object} rent detail object
  */
 const createRentDetail = async (req, res) => {
@@ -52,7 +52,7 @@ const createRentDetail = async (req, res) => {
 
 /**
  * @description Get all the Rent Details for owner user
- * @route GET /api/rentDetail/allRentDetails
+ * @route GET /api/rentDetailOwner/allRentDetails
  * @returns {object} Rent Details Array
  */
 const getAllRentDetailsOwnerView = async (req, res) => {
@@ -76,7 +76,7 @@ const getAllRentDetailsOwnerView = async (req, res) => {
 
 /**
  * @description Get all the Rent Details for owner user
- * @route GET /api/rentDetail/allRentDetails
+ * @route GET /api/rentDetailOwner/:rentDetailId
  * @returns {object} Rent Details Array
  */
 const getSingleRentDetailsOwnerView = async (req, res) => {
@@ -98,14 +98,26 @@ const getSingleRentDetailsOwnerView = async (req, res) => {
     throw new NotFoundError("Rent detail not found");
   }
 
-  const rentStatus = await rentDetail.isRentPaid();
+  const paymentHistoryResults = await PaymentHistory.find({
+    rentDetail: req.params.rentDetailId,
+  }).sort({ createdAt: -1 })
+
+
+  let rentStatus = false
+  if (paymentHistoryResults.length > 0) {
+    const latestPayment = paymentHistoryResults[0]
+
+    const lastPaidDate = new Date(latestPayment.currentRentDate.to)
+    const today = new Date();
+    rentStatus = today <= lastPaidDate;
+  }
 
   res.json({ rentDetail, rentStatus });
 };
 
 /**
  * @description Create rent payment history
- * @route POST /api/rentDetail/createPaymentHistory
+ * @route POST /api/rentDetailOwner/createPaymentHistory
  * @returns {object} Payment Detail Object
  */
 const createPaymentHistory = async (req, res) => {
@@ -115,13 +127,6 @@ const createPaymentHistory = async (req, res) => {
   const checkRentDetail = await RentDetail.findById(rentDetail);
   if (!checkRentDetail) {
     throw new NotFoundError("Rent detail not found");
-  }
-  const rentStatus = await checkRentDetail.isRentPaid();
-
-  if (rentStatus) {
-    throw new BadRequestError(
-      "Rent payment for this month is already registered."
-    );
   }
 
   const { currentRentDate, amountPaid, paymentMethod, nextRentDueDate } =
@@ -135,7 +140,7 @@ const createPaymentHistory = async (req, res) => {
   });
 
   // update next rent due date
-  checkRentDetail.currentRentDate = nextRentDueDate;
+  checkRentDetail.nextRentDate = nextRentDueDate;
   await checkRentDetail.save();
 
   res.status(201).json({ paymentDetail, msg: "Payment detail created" });
@@ -143,7 +148,7 @@ const createPaymentHistory = async (req, res) => {
 
 /**
  * @description Get All Payment History for owner user
- * @route GET /api/rentDetail/allPaymentHistory/:rentDetailId
+ * @route GET /api/rentDetailOwner/allPaymentHistory/:rentDetailId
  * @returns {object} All Payment History Array
  */
 const getAllPaymentHistory = async (req, res) => {

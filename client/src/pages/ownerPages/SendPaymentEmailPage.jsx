@@ -87,11 +87,11 @@ const SendPaymentEmailPage = () => {
                 I hope this email finds you well. This is a friendly reminder that your ${calculateNumberOfMonths(
                   rentDetail?.paymentPlan
                 )} rent payment for the dates from ${dateFormatter(
-        rentDetail?.currentRentDate.from
+                  rentDetail?.nextRentDate.from
       )} to ${dateFormatter(
-        rentDetail?.currentRentDate.to
+        rentDetail?.nextRentDate.to
       )} is due. As per our rental agreement, rent is to be paid within 7 days after ${dateFormatter(
-        rentDetail?.currentRentDate.from
+        rentDetail?.nextRentDate.from
         )}. The total rent amount is ${countryToCurrency[currentCountry.code]} ${format(
         calculateTotalRent(
           rentDetail?.paymentPlan,
@@ -119,7 +119,7 @@ const SendPaymentEmailPage = () => {
                   )
                 )}</b> <br />
                 Rent Due Date: <b>${dateFormatter(
-                  rentDetail?.currentRentDate.from
+                  rentDetail?.nextRentDate.from
                 )}</b>
                 <br />
               </p>
@@ -178,10 +178,10 @@ const SendPaymentEmailPage = () => {
                 I hope this email finds you well. This is a friendly reminder
                 that your {calculateNumberOfMonths(rentDetail?.paymentPlan)}{" "}
                 rent payment for the dates from{" "}
-                {dateFormatter(rentDetail?.currentRentDate.from)} to{" "}
-                {dateFormatter(rentDetail?.currentRentDate.to)} is due. As per
+                {dateFormatter(rentDetail?.nextRentDate.from)} to{" "}
+                {dateFormatter(rentDetail?.nextRentDate.to)} is due. As per
                 our rental agreement, rent is to be paid within 7 days after{" "}
-                {dateFormatter(rentDetail?.currentRentDate.from)}. The total
+                {dateFormatter(rentDetail?.nextRentDate.from)}. The total
                 rent amount is {countryToCurrency[currentCountry.code]}{" "}
                 {format(
                   calculateTotalRent(
@@ -217,7 +217,7 @@ const SendPaymentEmailPage = () => {
                 </b>{" "}
                 <br />
                 Rent Due Date:{" "}
-                <b>{dateFormatter(rentDetail?.currentRentDate.from)}</b> <br />
+                <b>{dateFormatter(rentDetail?.nextRentDate.from)}</b> <br />
                 <br />
               </p>
               <p>Best regards,</p>

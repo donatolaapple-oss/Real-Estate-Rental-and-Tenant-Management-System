@@ -25,7 +25,18 @@ const getSingleRentDetailsTenantView = async (req, res) => {
     throw new NotFoundError("Rent detail not found");
   }
 
-  const rentStatus = await rentDetail.isRentPaid();
+  const paymentHistoryResults = await PaymentHistory.find({
+    rentDetail: rentDetail._id,
+  }).sort({ createdAt: -1 })
+
+  let rentStatus = false
+  if (paymentHistoryResults.length > 0) {
+    const latestPayment = paymentHistoryResults[0]
+    const lastPaidDate = new Date(latestPayment.currentRentDate.to)
+    const today = new Date();
+    rentStatus = today <= lastPaidDate;
+  }
+
   res.json({ rentDetail, rentStatus });
 };
 

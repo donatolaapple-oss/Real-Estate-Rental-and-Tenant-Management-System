@@ -114,6 +114,7 @@ const realEstateTenantSlice = createSlice({
     clearAlert: (state) => {
       state.alertFlag = false;
       state.alertMsg = "";
+      state.success = false;
     },
   },
   extraReducers: (builder) => {

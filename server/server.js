@@ -85,7 +85,7 @@ app.use("/api/sendEmail", emailSenderRoutes); //send email
 
 app.use("/api/lease", leaseRoutes);
 
-app.use("/api/rentDetail", authorizeOwnerUser, ownerRentDetailRoutes);
+app.use("/api/rentDetailOwner", authorizeOwnerUser, ownerRentDetailRoutes);
 app.use("/api/rentDetailTenant", authorizeTenantUser, tenantRentDetailRoutes);
 
 app.use("/api/chat", chatRoutes);

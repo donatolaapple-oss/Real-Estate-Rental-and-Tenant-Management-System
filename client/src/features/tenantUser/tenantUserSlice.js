@@ -149,6 +149,7 @@ const tenantUserSlice = createSlice({
     clearAlert: (state) => {
       state.alertFlag = false;
       state.alertMsg = "";
+      state.success = false;
     },
     createAlert: (state, action) => {
       state.alertFlag = true;

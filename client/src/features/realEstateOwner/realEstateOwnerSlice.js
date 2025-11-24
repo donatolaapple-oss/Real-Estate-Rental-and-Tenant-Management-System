@@ -83,6 +83,7 @@ const realEstateOwnerSlice = createSlice({
     clearAlert: (state) => {
       state.alertFlag = false;
       state.alertMsg = "";
+      state.postSuccess = false;
     },
     createAlert: (state, action) => {
       state.alertFlag = true;

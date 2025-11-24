@@ -91,7 +91,7 @@ const CreatePaymentHistory = () => {
   const handleConfirmation = (e) => {
     e.preventDefault();
     const { paymentMethod } = paymentForm;
-    const nextDueDate = calculateNextDueDate(rentDetail?.currentRentDate?.to);
+    const nextDueDate = calculateNextDueDate(rentDetail?.nextRentDate?.to);
     setFormData({
       paymentMethod,
       rentDetail: rentDetailId,
@@ -100,8 +100,8 @@ const CreatePaymentHistory = () => {
         rentDetail?.realEstate?.price
       ),
       currentRentDate: {
-        from: rentDetail?.currentRentDate?.from,
-        to: rentDetail?.currentRentDate?.to,
+        from: rentDetail?.nextRentDate?.from,
+        to: rentDetail?.nextRentDate?.to,
       },
       nextRentDueDate: {
         from: nextDueDate,
@@ -140,8 +140,8 @@ const CreatePaymentHistory = () => {
               <div className="mb-3">
                 <h5 className="text-gray-700">
                   <DateRangeRoundedIcon />{" "}
-                  {dateFormatter(rentDetail?.currentRentDate.from)} -{" "}
-                  {dateFormatter(rentDetail?.currentRentDate.to)}
+                  {dateFormatter(rentDetail?.nextRentDate.from)} -{" "}
+                  {dateFormatter(rentDetail?.nextRentDate.to)}
                 </h5>
               </div>
               <div className="flex mb-3 gap-4">

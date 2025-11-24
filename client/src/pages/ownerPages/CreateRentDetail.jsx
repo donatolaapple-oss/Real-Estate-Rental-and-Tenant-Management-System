@@ -8,9 +8,7 @@ import { getOwnerAllLeases } from "../../features/ownerUser/ownerUserSlice";
 import { ConfirmModal, PageLoading } from "../../components";
 import { Button, CircularProgress, TextField, MenuItem } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import BorderColorRoundedIcon from "@mui/icons-material/BorderColorRounded";
-import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import { BorderColorRounded, HomeWorkRounded, InfoRounded } from "@mui/icons-material";
 import createRentImage from "../../assets/images/createRentImage.svg";
 import { calculateAddedDate } from "../../utils/valueFormatter";
 import useToast from "../../hooks/useToast";
@@ -90,7 +88,7 @@ const CreateRentDetail = () => {
     if (success) {
       const timer = setTimeout(() => {
         navigate(`/owner/rentDetail`);
-      }, 1500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [success, navigate]);
@@ -109,7 +107,7 @@ const CreateRentDetail = () => {
       realEstate,
       paymentPlan,
       startDate,
-      currentRentDate: {
+      nextRentDate: {
         from: startDate,
         to: calculateAddedDate(paymentPlan, startDate),
       },
@@ -126,7 +124,7 @@ const CreateRentDetail = () => {
   if (isLoading) return <PageLoading />;
 
   return (
-    <main className="flex flex-col md:flex-row">
+    <main className="flex flex-col lg:flex-row">
       <div className="mt-10 flex flex-col items-center md:ml-16 md:items-start">
         <div className="mb-6">
           <h3 className="font-heading font-bold">Create Rent Detail</h3>
@@ -137,10 +135,10 @@ const CreateRentDetail = () => {
 
         <div className="">
           <form id="form" onSubmit={handleConfirmation}>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <div className="mb-4">
+            <div className="flex flex-col gap-4 justify-center md:justify-start">
+              <div className="flex flex-col mb-4 items-center md:items-start w-full">
                 <h5 className="text-gray-700 mb-3">
-                  <HomeWorkRoundedIcon /> Select Your Real Estate
+                  <HomeWorkRounded /> Select Your Real Estate
                 </h5>
                 <TextField
                   select
@@ -148,7 +146,7 @@ const CreateRentDetail = () => {
                   label="Real Estate"
                   value={leaseForm.realEstate}
                   onChange={handleChange}
-                  sx={{ width: "300px" }}
+                  sx={{ width: "100%" }}
                   name="realEstate"
                   color="tertiary"
                 >
@@ -163,16 +161,15 @@ const CreateRentDetail = () => {
                   ))}
                 </TextField>
               </div>
-              <div className="flex flex-col items-center md:items-start">
+              <div className="flex flex-col items-center md:items-start mb-3">
                 <h5 className="text-gray-700 mb-3">
-                  <InfoRoundedIcon /> Lease Details
+                  <InfoRounded /> Lease Details
                 </h5>
-                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                <div className="flex flex-col lg:flex-row  gap-4 justify-center md:justify-start w-full">
                   <TextField
                     label="Tenant"
                     value={leaseForm.tenantName}
                     color="tertiary"
-                    sx={{ width: "300px" }}
                   />
 
                   <TextField
@@ -180,7 +177,6 @@ const CreateRentDetail = () => {
                     value={leaseForm.startDate}
                     name="startDate"
                     color="tertiary"
-                    sx={{ width: "300px" }}
                   />
 
                   <TextField
@@ -188,7 +184,6 @@ const CreateRentDetail = () => {
                     value={leaseForm.paymentPlan}
                     name="paymentPlan"
                     color="tertiary"
-                    sx={{ width: "300px" }}
                   />
 
                   <TextField
@@ -196,12 +191,11 @@ const CreateRentDetail = () => {
                     value={leaseForm.rentAmount}
                     name="rentAmount"
                     color="tertiary"
-                    sx={{ width: "300px" }}
                   />
                 </div>
               </div>
             </div>
-            <div className="text-center mt-4 mb-6">
+            <div className="text-center mt-8 mb-6">
               <Button
                 disabled={isProcessing}
                 type="submit"
@@ -215,7 +209,7 @@ const CreateRentDetail = () => {
                     opacity: [0.9, 0.8, 0.7],
                   },
                 }}
-                startIcon={<BorderColorRoundedIcon />}
+                startIcon={<BorderColorRounded />}
               >
                 {isProcessing ? (
                   <CircularProgress
