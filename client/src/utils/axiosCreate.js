@@ -37,8 +37,8 @@ axiosFetch.interceptors.response.use(
     console.log(error);
     const originalRequest = error.config;
     if (
-      error?.response.status === 401 &&
-      error?.response.data.msg === "Access Token is not valid" &&
+      error?.response?.status === 401 &&
+      error?.response?.data?.msg === "Access Token is not valid" &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
@@ -49,9 +49,9 @@ axiosFetch.interceptors.response.use(
         return axiosFetch(error.config);
       } catch (err) {
         if (
-          err?.response.status === 401 &&
-          (err?.response.data.msg === "Invalid refresh token" ||
-            err?.response.data.msg === "Refresh token not found")
+          err?.response?.status === 401 &&
+          (err?.response?.data?.msg === "Invalid refresh token" ||
+            err?.response?.data?.msg === "Refresh token not found")
         ) {
           try {
             store.dispatch(logOut());

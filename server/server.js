@@ -52,6 +52,15 @@ if (process.env.NODE_ENV !== "production") {
 //static folder for frontend build files in production mode only (to serve frontend files)
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+/** Uploaded listing images (local dev — see utils/cloudinaryUpload.js) */
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"), {
+    fallthrough: true,
+    maxAge: process.env.NODE_ENV === "production" ? "7d" : 0,
+  })
+);
+
 //set static folder for frontend build files
 app.use(express.static(path.resolve(__dirname, "../client/dist")));
 

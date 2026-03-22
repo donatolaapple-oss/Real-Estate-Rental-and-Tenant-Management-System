@@ -10,7 +10,9 @@ const ProtectedRoutes = ({ children, source }) => {
   const match =
     user &&
     (userType === source ||
-      (source === "landlord" && userType === "owner"));
+      (source === "owner" && userType === "landlord") ||
+      (source === "landlord" && (userType === "landlord" || userType === "owner")) ||
+      (source === "admin" && userType === "admin"));
   if (!match) {
     dispatch(logOut());
     return <Navigate to="/" />;

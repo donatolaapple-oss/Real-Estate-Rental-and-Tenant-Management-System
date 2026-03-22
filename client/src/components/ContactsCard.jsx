@@ -25,7 +25,7 @@ const ContactsCard = ({
       }}
     >
       <Link
-        to={`/${tenant ? "tenant/owner-user" : "owner/tenant-user"}/${slug}`}
+        to={`/${tenant ? "tenant/owner-user" : "landlord/tenant-user"}/${slug}`}
       >
         <CardActionArea>
           <CardMedia

@@ -41,7 +41,7 @@ const RentDetailComponent = ({
         color: "#102a43",
       }}
     >
-      <Link to={`/owner/rentDetail/${_id}/${realEstate?.slug}`}>
+      <Link to={`/landlord/rentDetail/${_id}/${realEstate?.slug}`}>
         <CardActionArea>
           <CardMedia
             component="img"
@@ -96,7 +96,7 @@ const RentDetailComponent = ({
             {tenant?.firstName} {tenant?.lastName}
           </span>
         </div>
-        <Link className="ml-auto" to={`/owner/tenant-user/${tenant?.slug}`}>
+        <Link className="ml-auto" to={`/landlord/tenant-user/${tenant?.slug}`}>
           <Button
             size="small"
             color="tertiary"

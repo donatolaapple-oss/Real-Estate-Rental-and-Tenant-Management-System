@@ -15,10 +15,16 @@ import {
 router.get("/", getAllProperties);
 
 /**
- * @description Get single property
- * @route GET /api/tenant/real-estate/:slug
+ * @description Get all saved properties (must be before /:slug)
+ * @route GET /api/tenant/real-estate/saved/all
  */
-router.get("/:slug", getSingleProperty);
+router.get("/saved/all", getAllSavedProperties);
+
+/**
+ * @description Chatbot property search (must be before /:slug)
+ * @route GET /api/tenant/real-estate/chatbot/search
+ */
+router.get("/chatbot/search", chatbotPropertySearch);
 
 /**
  * @description Toggle save property for tenant user
@@ -27,15 +33,9 @@ router.get("/:slug", getSingleProperty);
 router.patch("/save/:id", savePropertyToggle);
 
 /**
- * @description Get all saved properties
- * @route GET /api/tenant/real-estate/save/all
+ * @description Get single property
+ * @route GET /api/tenant/real-estate/:slug
  */
-router.get("/saved/all", getAllSavedProperties);
-
-/**
- * @description Chatbot property search
- * @route GET /api/tenant/real-estate/chatbot/search
- */
-router.get("/chatbot/search", chatbotPropertySearch);
+router.get("/:slug", getSingleProperty);
 
 export default router;

@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import { createNumberFormatter } from "../utils/valueFormatter";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import countryToCurrency from "country-to-currency";
 import { countries } from "../utils/countryList";
 
@@ -127,19 +127,27 @@ const RealEstateCard = ({
   fromOwnerUser,
   fromUserProfile,
 }) => {
+  const { pathname } = useLocation();
+  const ownerBase = pathname.startsWith("/landlord") ? "/landlord" : "/owner";
   const currentCountry = countries.find(
     (country) => country.label === address?.country
   );
-  const format = createNumberFormatter(currentCountry?.code);
+  const format = createNumberFormatter(currentCountry?.code || "PH");
   
   // 360 VIEWER: Check if property has 360 images
-  const has360Images = realEstateImages && realEstateImages.length > 0;
+  const imageSrc =
+    Array.isArray(realEstateImages) && realEstateImages.length > 0
+      ? typeof realEstateImages[0] === "string"
+        ? realEstateImages[0]
+        : realEstateImages[0]?.url || realEstateImages[0]?.secure_url
+      : null;
+  const has360Images = Array.isArray(realEstateImages) && realEstateImages.length > 0;
   
   return (
     <Link
       to={
         fromOwnerUser
-          ? `/owner/real-estate/${slug}`
+          ? `${ownerBase}/real-estate/${slug}`
           : `/tenant/real-estate/${slug}`
       }
     >
@@ -157,8 +165,11 @@ const RealEstateCard = ({
           <CardActionArea>
             <CardMedia
               component="img"
-              sx={{ maxHeight: 150 }}
-              image={realEstateImages[0]}
+              sx={{ maxHeight: 150, objectFit: "cover", bgcolor: "#e2e8f0" }}
+              image={
+                imageSrc ||
+                "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80"
+              }
               alt={title}
             />
             <CardContent>
@@ -170,7 +181,8 @@ const RealEstateCard = ({
               </h4>
               <p className="text-sm text-gray-400">{category}</p>
               <p className="font-semibold">
-              {countryToCurrency[currentCountry.code]} <span className="">{format(price)}</span> / month
+              {countryToCurrency[currentCountry?.code || "PH"]}{" "}
+              <span className="">{format(price)}</span> / month
               </p>
               <p className="text-base">
               <LocationOnOutlinedIcon color="secondary" />{address?.streetName}, {address?.city}
@@ -183,7 +195,16 @@ const RealEstateCard = ({
                     size="small"
                     variant="contained"
                     color="secondary"
-                    onClick={() => Viewer360.createViewer(realEstateImages, slug)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      Viewer360.createViewer(
+                        (realEstateImages || []).map((x) =>
+                          typeof x === "string" ? x : x?.url || x?.secure_url
+                        ),
+                        slug
+                      );
+                    }}
                     sx={{
                       backgroundColor: "#1976d2",
                       color: "white",

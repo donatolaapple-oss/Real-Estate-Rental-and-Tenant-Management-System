@@ -29,15 +29,6 @@ import PhoneNumberField from "./PhoneNumberField";
 import ImageDropZone from "./ImageDropZone";
 import TenantChatbot from './TenantChatbot';
 
-function TenantDashboard() {
-  return (
-    <div>
-      {/* Your tenant content */}
-      <TenantChatbot properties={yourProperties} />
-    </div>
-  );
-}
-
 export {
   SharedLayout,
   ProtectedRoutes,
@@ -69,4 +60,5 @@ export {
   ProfilePageComponent,
   PhoneNumberField,
   ImageDropZone,
+  TenantChatbot,
 };

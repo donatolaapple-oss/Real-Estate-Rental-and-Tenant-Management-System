@@ -67,7 +67,7 @@ const Header = () => {
                 </div>
               </div>
               <div className="modal-body relative p-4 flex flex-col h-3/4 gap-5">
-                {userType === "owner" ? (
+                {userType === "owner" || userType === "landlord" ? (
                   <NavBarLinksOwner toggleMenu={toggleMenu} />
                 ) : (
                   <NavBarLinksTenant toggleMenu={toggleMenu} />
@@ -83,7 +83,7 @@ const Header = () => {
         </div>
 
         <nav className="hidden justify-evenly items-center w-1/3 lg:flex">
-          {userType === "owner" ? (
+          {userType === "owner" || userType === "landlord" ? (
             <NavBarLinksOwner toggleMenu={toggleMenu} />
           ) : (
             <NavBarLinksTenant toggleMenu={toggleMenu} />

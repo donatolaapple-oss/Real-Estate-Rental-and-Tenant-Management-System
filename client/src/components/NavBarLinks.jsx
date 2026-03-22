@@ -7,7 +7,7 @@ const NavBarLinksOwner = ({ toggleMenu }) => {
   const { unreadMessageCount } = useContext(SocketContext);
   return (
     <>
-      <Link to="/owner" onClick={toggleMenu} className="text-center">
+      <Link to="/landlord/dashboard" onClick={toggleMenu} className="text-center">
         <Button
           type="text"
           sx={{
@@ -22,7 +22,7 @@ const NavBarLinksOwner = ({ toggleMenu }) => {
         </Button>
       </Link>
       <Link
-        to="/owner/property/post"
+        to="/landlord/property/post"
         onClick={toggleMenu}
         className="text-center"
       >
@@ -40,7 +40,7 @@ const NavBarLinksOwner = ({ toggleMenu }) => {
         </Button>
       </Link>
       <Link
-        to="/owner/contacts/all"
+        to="/landlord/contacts/all"
         onClick={toggleMenu}
         className="text-center"
       >
@@ -57,7 +57,7 @@ const NavBarLinksOwner = ({ toggleMenu }) => {
           Contacts
         </Button>
       </Link>
-      <Link to="/owner/rentDetail" onClick={toggleMenu} className="text-center">
+      <Link to="/landlord/rentDetail" onClick={toggleMenu} className="text-center">
         <Button
           type="text"
           sx={{
@@ -72,7 +72,7 @@ const NavBarLinksOwner = ({ toggleMenu }) => {
         </Button>
       </Link>
       <Link
-        to="/owner/chat"
+        to="/landlord/chat"
         onClick={toggleMenu}
         className="text-center relative"
       >
@@ -103,7 +103,7 @@ const NavBarLinksTenant = ({ toggleMenu }) => {
   const { unreadMessageCount } = useContext(SocketContext);
   return (
     <>
-      <Link to="/tenant" onClick={toggleMenu} className="text-center">
+      <Link to="/tenant/dashboard" onClick={toggleMenu} className="text-center">
         <Button
           type="text"
           sx={{

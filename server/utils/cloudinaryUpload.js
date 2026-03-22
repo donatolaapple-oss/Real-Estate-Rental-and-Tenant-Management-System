@@ -5,6 +5,15 @@ import fs from 'fs';
 import path from 'path';
 dotenv.config();
 
+/** Base URL for browser-accessible file URLs (no trailing slash). */
+function publicBaseUrl() {
+  if (process.env.PUBLIC_BASE_URL) {
+    return process.env.PUBLIC_BASE_URL.replace(/\/$/, "");
+  }
+  const port = process.env.PORT || 5002;
+  return `http://localhost:${port}`;
+}
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -91,7 +100,7 @@ export const cloudinaryMultipleUpload = async (files, uploadPath) => {
             fs.copyFileSync(file.path, uploadPath);
             
             // Add to URLs array
-            const imageUrl = `http://localhost:5000/uploads/${filename}`;
+            const imageUrl = `${publicBaseUrl()}/uploads/${filename}`;
             imageUrls.push(imageUrl);
             console.log(' Local upload successful:', imageUrl);
         }
