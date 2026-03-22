@@ -28,6 +28,7 @@ import ProfilePageComponent from "./ProfilePageComponent";
 import PhoneNumberField from "./PhoneNumberField";
 import ImageDropZone from "./ImageDropZone";
 import TenantChatbot from './TenantChatbot';
+import ChatbotErrorBoundary from "./ChatbotErrorBoundary";
 
 export {
   SharedLayout,
@@ -61,4 +62,5 @@ export {
   PhoneNumberField,
   ImageDropZone,
   TenantChatbot,
+  ChatbotErrorBoundary,
 };
