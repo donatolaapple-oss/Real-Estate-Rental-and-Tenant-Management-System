@@ -1,7 +1,16 @@
+import mongoose from "mongoose";
 import Chat from "../models/Chats.js";
 import OwnerUser from "../models/OwnerUser.js";
 import TenantUser from "../models/TenantUser.js";
 import BadRequestError from "../request-errors/BadRequest.js";
+
+function asObjectId(id) {
+  try {
+    return new mongoose.Types.ObjectId(id);
+  } catch {
+    return null;
+  }
+}
 
 /**
  * @description Send message
@@ -10,10 +19,18 @@ import BadRequestError from "../request-errors/BadRequest.js";
 const sendMessage = async (req, res) => {
   const { to, message } = req.body;
   const { userId: from } = req.user;
+  if (!to || !message) {
+    throw new BadRequestError("to and message are required");
+  }
+  const fromOid = asObjectId(from);
+  const toOid = asObjectId(to);
+  if (!fromOid || !toOid) {
+    throw new BadRequestError("Invalid user id");
+  }
   const newMessage = await Chat.create({
-    chatUsers: [from, to],
-    message,
-    sender: from,
+    chatUsers: [fromOid, toOid],
+    message: String(message).trim(),
+    sender: String(from),
   });
   res.status(201).json({ newMessage, msg: "Message sent successfully" });
 };
@@ -25,14 +42,20 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   const { to } = req.body;
   const { userId: from } = req.user;
+  const fromOid = asObjectId(from);
+  const toOid = asObjectId(to);
+  if (!fromOid || !toOid) {
+    throw new BadRequestError("Invalid chat participant");
+  }
 
   const msgs = await Chat.find({
-    chatUsers: { $all: [from, to] },
+    chatUsers: { $all: [fromOid, toOid] },
   }).sort({ createdAt: 1 });
 
+  const fromStr = String(from);
   const messages = msgs.map((msg) => {
     return {
-      fromSelf: msg.sender === from,
+      fromSelf: String(msg.sender) === fromStr,
       message: msg.message,
       isRead: msg.isRead,
       createdAt: msg.createdAt,
@@ -48,11 +71,15 @@ const getMessages = async (req, res) => {
 
 const getChats = async (req, res) => {
   const { userId } = req.user;
+  const userOid = asObjectId(userId);
+  if (!userOid) {
+    return res.status(200).json({ chats: [] });
+  }
 
   const lastMessages = await Chat.aggregate([
     {
       $match: {
-        chatUsers: { $in: [userId] },
+        chatUsers: { $in: [userOid] },
       },
     },
     {
@@ -74,31 +101,40 @@ const getChats = async (req, res) => {
     }
   ]);
 
-  const chatContacts = lastMessages.map((lastMessage) => {
-    const to = lastMessage.chatUsers.find(id => id !== userId)
-    lastMessage.to = to
-    return to
-  })
+  const uidStr = userId.toString();
+  const chatContacts = lastMessages
+    .map((lastMessage) => {
+      const other = lastMessage.chatUsers.find((id) => id.toString() !== uidStr);
+      lastMessage.to = other;
+      return other;
+    })
+    .filter(Boolean);
   // console.log("lastMessages", lastMessages)
-  let contacts = []
+  let contacts = [];
   if (req.path.includes("tenant")) {
     contacts = await OwnerUser.find({ _id: { $in: chatContacts } }).select(
-      "firstName lastName profileImage slug"
+      "firstName lastName profileImage slug _id"
     );
-  } else if (req.path.includes("owner")) {
-    contacts = await TenantUser.find({ _id: { $in: chatContacts } }).select("firstName lastName profileImage slug");
+  } else {
+    contacts = await TenantUser.find({ _id: { $in: chatContacts } }).select(
+      "firstName lastName profileImage slug _id"
+    );
   }
   // console.log(contacts)
 
-  const chats = lastMessages.map((lastMessage) => {
-    const contact = contacts.find(
-      (contact) => contact._id.toString() === lastMessage.to
-    );
-    return {
-      ...lastMessage,
-      ...contact?._doc,
-    }
-  }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const chats = lastMessages
+    .map((lastMessage) => {
+      const contact = contacts.find(
+        (c) => c._id.toString() === lastMessage.to?.toString?.()
+      );
+      const merged = {
+        ...lastMessage,
+        ...(contact ? contact.toObject?.() || contact : {}),
+      };
+      if (contact) merged._id = contact._id;
+      return merged;
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return res.status(200).json({ chats });
 }

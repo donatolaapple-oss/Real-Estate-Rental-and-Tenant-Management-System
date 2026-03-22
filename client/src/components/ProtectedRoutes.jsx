@@ -7,7 +7,11 @@ const ProtectedRoutes = ({ children, source }) => {
   const { user, userType } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
 
-  if (!user || userType !== source) {
+  const match =
+    user &&
+    (userType === source ||
+      (source === "landlord" && userType === "owner"));
+  if (!match) {
     dispatch(logOut());
     return <Navigate to="/" />;
   }

@@ -88,3 +88,16 @@ input::-webkit-inner-spin-button {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.leaflet-container {
+  height: 100% !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #e9ecef;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+  transition: all 0.3s ease;
+}

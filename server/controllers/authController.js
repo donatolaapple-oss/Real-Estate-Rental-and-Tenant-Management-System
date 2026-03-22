@@ -1,5 +1,6 @@
 import OwnerUser from "../models/OwnerUser.js";
 import TenantUser from "../models/TenantUser.js";
+import AdminUser from "../models/AdminUser.js";
 import { BadRequestError, UnAuthorizedError } from "../request-errors/index.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/emailSender.js";
@@ -15,7 +16,31 @@ const login = async (req, res) => {
   if (!email || !password) {
     throw new BadRequestError("Provide email and password");
   }
-  if (role === "owner") {
+  if (role === "admin") {
+    const admin = await AdminUser.findOne({ email }).select("+password");
+    if (!admin) {
+      throw new UnAuthorizedError("Email not found!");
+    }
+    const isMatch = await admin.matchPassword(password);
+    if (!isMatch) {
+      throw new UnAuthorizedError("Incorrect Password!");
+    }
+    const accessToken = admin.createAccessToken();
+    const refreshToken = admin.createRefreshToken();
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    admin.password = undefined;
+    res.status(200).json({
+      admin,
+      accessToken,
+      userType: "admin",
+      accountStatus: true,
+    });
+  } else if (role === "landlord" || role === "owner") {
     const owner = await OwnerUser.findOne({ email }).select("+password");
     if (!owner) {
       throw new UnAuthorizedError("Email not found!");
@@ -26,31 +51,29 @@ const login = async (req, res) => {
       throw new UnAuthorizedError("Incorrect Password!");
     }
 
-    // check if account's email is verified
     if (!owner.accountStatus) {
       return res.status(200).json({
         message: "Account not verified",
         email: owner.email,
         accountStatus: owner.accountStatus,
-        userType: "owner",
+        userType: "landlord",
       });
     }
 
     const accessToken = owner.createAccessToken();
     const refreshToken = owner.createRefreshToken();
 
-    // Create secure cookie with refresh token
     res.cookie("jwt", refreshToken, {
-      httpOnly: true, //accessible only by web server
-      secure: true, //https
-      sameSite: "None", //cross-site cookie
-      maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match refresh token expiry
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     owner.password = undefined;
     res.status(200).json({
-      owner,
+      landlord: owner,
       accessToken,
-      userType: "owner",
+      userType: "landlord",
       accountStatus: owner.accountStatus,
     });
   } else if (role === "tenant") {
@@ -78,10 +101,10 @@ const login = async (req, res) => {
 
     // Create secure cookie with refresh token
     res.cookie("jwt", refreshToken, {
-      httpOnly: true, //accessible only by web server
-      secure: true, //https
-      sameSite: "None", //cross-site cookie
-      maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match refresh token expiry
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     tenant.password = undefined;
     res.status(200).json({
@@ -103,8 +126,7 @@ const login = async (req, res) => {
 const register = async (req, res) => {
 
   const { role, email } = req.body;
-  // console.log(req.body)
-  if (role === "owner") {
+  if (role === "landlord" || role === "owner") {
     //generate token
     const verificationToken = jwt.sign(
       { email: email },
@@ -131,7 +153,7 @@ const register = async (req, res) => {
     const body = `
     <p> Hello ${owner.firstName} ${owner.lastName},</p>
     <p>Please click on the link below to verify your account on Property Plus</p>
-    <a href="${process.env.CLIENT_URL}/#/verify-account/owner/${verificationToken}">Verify Account</a>
+    <a href="${process.env.CLIENT_URL}/#/verify-account/landlord/${verificationToken}">Verify Account</a>
     <p>Regards,</p>
     <p>Team Property Plus</p>
     `;
@@ -143,7 +165,7 @@ const register = async (req, res) => {
 
     res
       .status(201)
-      .json({ success: true, userType: "owner", email: owner.email });
+      .json({ success: true, userType: "landlord", email: owner.email });
   } else if (role === "tenant") {
     //generate token
     const verificationToken = jwt.sign(
@@ -197,7 +219,7 @@ const verifyAccount = (req, res) => {
   if (!token) {
     throw new BadRequestError("Token not found");
   }
-  if (role === "owner") {
+  if (role === "landlord" || role === "owner") {
     //verify token
     jwt.verify(
       token,
@@ -278,7 +300,7 @@ const verifyAccount = (req, res) => {
 const resendVerificationEmail = async (req, res) => {
   const { email, role } = req.body;
 
-  if (role === "owner") {
+  if (role === "landlord" || role === "owner") {
     //generate token
     const verificationToken = jwt.sign(
       { email: email },
@@ -306,7 +328,7 @@ const resendVerificationEmail = async (req, res) => {
     const body = `
     <p> Hello ${owner.firstName} ${owner.lastName},</p>
     <p>Please click on the link below to verify your account on Property Plus</p>
-    <a href="${process.env.CLIENT_URL}/#/verify-account/owner/${verificationToken}">Verify Account</a>
+    <a href="${process.env.CLIENT_URL}/#/verify-account/landlord/${verificationToken}">Verify Account</a>
     <p>Regards,</p>
     <p>Team Property Plus</p>
     `;
@@ -362,7 +384,7 @@ const resendVerificationEmail = async (req, res) => {
  * @description generate new access token
  * @returns {string} access token
  */
-const refreshOwner = async (req, res) => {
+const refreshLandlord = async (req, res) => {
   const cookie = req.cookies;
 
   if (!cookie?.jwt) {
@@ -383,6 +405,26 @@ const refreshOwner = async (req, res) => {
     }
     const accessToken = user.createAccessToken();
     res.json({ accessToken });
+  } catch (error) {
+    throw new UnAuthorizedError("Invalid refresh token");
+  }
+};
+
+const refreshAdmin = async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie?.jwt) {
+    throw new UnAuthorizedError("Refresh token not found");
+  }
+  try {
+    const payload = jwt.verify(
+      cookie.jwt,
+      process.env.REFRESH_TOKEN_SECRET_ADMIN || process.env.REFRESH_TOKEN_SECRET_OWNER
+    );
+    const user = await AdminUser.findOne({ _id: payload.userId });
+    if (!user) {
+      throw new UnAuthorizedError("User not found");
+    }
+    res.json({ accessToken: user.createAccessToken() });
   } catch (error) {
     throw new UnAuthorizedError("Invalid refresh token");
   }
@@ -425,7 +467,7 @@ const refreshTenant = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const { email, role } = req.body;
 
-  if (role === "owner") {
+  if (role === "landlord" || role === "owner") {
     const user = await OwnerUser.findOne({ email }); //check if user exists
     if (!user) {
       throw new BadRequestError("User with this email was not found");
@@ -442,7 +484,7 @@ const forgotPassword = async (req, res) => {
     const subject = "Reset Account Password Link";
     const body = `
   <h3>Please click the link below to reset your password</h3>
-  <a href="${process.env.CLIENT_URL}/#/reset-password/owner/${token}">Reset Password</a>`;
+  <a href="${process.env.CLIENT_URL}/#/reset-password/landlord/${token}">Reset Password</a>`;
 
     //update the user and add the token
     user.passwordResetToken = token;
@@ -511,8 +553,7 @@ const resetPassword = async (req, res) => {
     throw new BadRequestError("Passwords do not match");
   }
 
-  if (role === "owner") {
-    //verify token
+  if (role === "landlord" || role === "owner") {
     jwt.verify(
       token,
       process.env.RESET_PASSWORD_KEY,
@@ -520,7 +561,6 @@ const resetPassword = async (req, res) => {
         if (error) {
           return res.status(400).json({ msg: "Invalid or expired token" });
         }
-        //find user with token
         const user = await OwnerUser.findOne({ passwordResetToken: token });
         if (!user) {
           return res
@@ -591,7 +631,8 @@ export {
   login,
   register,
   verifyAccount,
-  refreshOwner,
+  refreshLandlord,
+  refreshAdmin,
   refreshTenant,
   forgotPassword,
   resetPassword,

@@ -7,9 +7,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearAlert,
-  loginOwner,
+  loginLandlord,
   loginTenant,
+  loginAdmin,
   stateClear,
+  createAlert,
 } from "../features/auth/authSlice";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import loginImg from "../assets/images/loginImg.svg";
@@ -41,15 +43,22 @@ const Login = () => {
     clearAlertAction: clearAlert,
   });
 
+  const dashboardFor = (type) => {
+    if (type === "admin") return "/admin/dashboard";
+    if (type === "tenant") return "/tenant/dashboard";
+    if (type === "landlord") return "/landlord/dashboard";
+    return "/";
+  };
+
   useEffect(() => {
-    if (user) {
-      navigate(`/${userType}`);
+    if (user && userType) {
+      navigate(dashboardFor(userType));
     }
   }, [user, navigate, userType]);
 
   useEffect(() => {
     if (success && accountStatus) {
-      navigate(`/${userType}`);
+      navigate(dashboardFor(userType));
     } else if (success && !accountStatus) {
       navigate(`/account-created/${userType}`);
       dispatch(stateClear());
@@ -59,43 +68,65 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const { email, password } = values;
+    const role = param.role;
+    if (!role || !["landlord", "owner", "tenant", "admin"].includes(role)) {
+      dispatch(
+        createAlert(
+          "Use a role-specific link: #/login/tenant, #/login/landlord, or #/login/admin"
+        )
+      );
+      return;
+    }
     const userInfo = {
       email,
       password,
-      role: param.role,
+      role,
     };
-    if (param.role === "owner") {
-      dispatch(loginOwner({ userInfo }));
-    } else if (param.role === "tenant") {
+    if (role === "landlord" || role === "owner") {
+      dispatch(loginLandlord({ userInfo }));
+    } else if (role === "tenant") {
       dispatch(loginTenant({ userInfo }));
+    } else if (role === "admin") {
+      dispatch(loginAdmin({ userInfo }));
     }
   };
 
-  const handleChange = useCallback(
-    (e) => {
-      setFormValues({ ...values, [e.target.name]: e.target.value });
-    },
-    [values]
-  );
-
-  const handleFillCredentials = useCallback(() => {
-    setFormValues({
-      email:
-        param.role === "owner"
-          ? "test_owner_user@property.com"
-          : "test_tenant_user@property.com",
-      password: "secret",
-    });
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   }, []);
+
+  const handleFillCredentials = useCallback(
+    (e) => {
+      e?.preventDefault?.();
+      // Vite exposes env via import.meta.env; `process` is undefined in the browser.
+      const adminEmail =
+        import.meta.env.VITE_ADMIN_DEMO_EMAIL || "admin@stayscout.com";
+      const emails = {
+        landlord: "landlord@stayscout.com",
+        owner: "landlord@stayscout.com",
+        tenant: "tenant@stayscout.com",
+        admin: adminEmail,
+      };
+      const role = param.role;
+      const password =
+        role === "admin" ? "admin123" : role === "landlord" || role === "owner" ? "landlord123" : "tenant123";
+      setFormValues({
+        email: emails[role] ?? emails.tenant,
+        password,
+      });
+    },
+    [param.role]
+  );
 
   return (
     <div>
       <header className="flex m-1 shadow-sm">
         <Logo />
         <div className="flex flex-col justify-center ml-2">
-          <h5 className="font-display">Rent Manager</h5>
+          <h5 className="font-display">StayScout</h5>
           <p className="hidden text-xs md:block md:text-sm">
-            Find and Manage your rentals in one place
+            AI boarding house finder
           </p>
         </div>
       </header>
@@ -126,6 +157,7 @@ const Login = () => {
                 />
                 <div>
                   <Button
+                    type="button"
                     variant="contained"
                     size="medium"
                     color="tertiary"
@@ -177,15 +209,17 @@ const Login = () => {
                     )}
                   </Button>
                 </div>
-                <p className="text-sm font-medium mt-4 pt-1 mb-0 md:text-base">
-                  Don't have an account?{" "}
-                  <Link
-                    to={`/register/${param.role}`}
-                    className="text-secondary hover:text-secondaryDark transition duration-200 ease-in-out"
-                  >
-                    Register
-                  </Link>
-                </p>
+                {param.role !== "admin" && (
+                  <p className="text-sm font-medium mt-4 pt-1 mb-0 md:text-base">
+                    Don&apos;t have an account?{" "}
+                    <Link
+                      to={`/register/${param.role}`}
+                      className="text-secondary hover:text-secondaryDark transition duration-200 ease-in-out"
+                    >
+                      Register
+                    </Link>
+                  </p>
+                )}
               </div>
             </form>
           </div>

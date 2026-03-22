@@ -12,6 +12,110 @@ import { Link } from "react-router-dom";
 import countryToCurrency from "country-to-currency";
 import { countries } from "../utils/countryList";
 
+// ✅ 360 VIEWER: Offline 360 photo viewer
+const Viewer360 = {
+  createViewer: (images, propertyId) => {
+    const viewerContainer = document.createElement('div');
+    viewerContainer.id = `viewer-360-${propertyId}`;
+    viewerContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: move;
+    `;
+    
+    const viewerContent = document.createElement('div');
+    viewerContent.style.cssText = `
+      width: 90%;
+      height: 80%;
+      max-width: 800px;
+      max-height: 600px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      padding: 20px;
+      position: relative;
+    `;
+    
+    // Create 360 image gallery
+    const imageGallery = document.createElement('div');
+    imageGallery.style.cssText = `
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    `;
+    
+    images.forEach((image, index) => {
+      const img = document.createElement('img');
+      img.src = image;
+      img.style.cssText = `
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      `;
+      img.onclick = () => Viewer360.showImage(image, index);
+      imageGallery.appendChild(img);
+    });
+    
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕ Close 360° View';
+    closeBtn.style.cssText = `
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 10000;
+    `;
+    closeBtn.onclick = () => document.body.removeChild(viewerContainer);
+    
+    viewerContent.appendChild(imageGallery);
+    viewerContent.appendChild(closeBtn);
+    viewerContainer.appendChild(viewerContent);
+    
+    // Add to page
+    document.body.appendChild(viewerContainer);
+  },
+  
+  showImage: (image, index) => {
+    const mainImage = viewerContainer.querySelector('.viewer-360-main-image');
+    if (mainImage) {
+      mainImage.src = image;
+    } else {
+      const newMainImage = document.createElement('img');
+      newMainImage.src = image;
+      newMainImage.style.cssText = `
+        width: 100%;
+        height: 300px;
+        object-fit: contain;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      `;
+      newMainImage.className = 'viewer-360-main-image';
+      viewerContent.insertBefore(newMainImage, viewerContent.firstChild);
+    }
+  }
+};
+
 const RealEstateCard = ({
   title,
   slug,
@@ -27,6 +131,10 @@ const RealEstateCard = ({
     (country) => country.label === address?.country
   );
   const format = createNumberFormatter(currentCountry?.code);
+  
+  // 360 VIEWER: Check if property has 360 images
+  const has360Images = realEstateImages && realEstateImages.length > 0;
+  
   return (
     <Link
       to={
@@ -67,6 +175,27 @@ const RealEstateCard = ({
               <p className="text-base">
               <LocationOnOutlinedIcon color="secondary" />{address?.streetName}, {address?.city}
               </p>
+              
+              {/* 360 VIEWER BUTTON */}
+              {has360Images && (
+                <div className="mt-2">
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => Viewer360.createViewer(realEstateImages, slug)}
+                    sx={{
+                      backgroundColor: "#1976d2",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#1565c0",
+                      },
+                    }}
+                  >
+                    360° Virtual Tour
+                  </Button>
+                </div>
+              )}
             </CardContent>
         </CardActionArea>
         {/*  render the contact bar only if the user is not the owner of the property */}

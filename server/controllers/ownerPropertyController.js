@@ -24,6 +24,18 @@ const postRealEstate = async (req, res) => {
   req.body.address = { streetName, city, state, country };
   req.body.propertyOwner = req.user.userId;
   req.body.propertyId = nanoid(7);
+  req.body.listingStatus = "pending";
+
+  if (req.body.lat !== undefined && req.body.lat !== "") {
+    const la = parseFloat(req.body.lat);
+    if (!Number.isNaN(la)) req.body.lat = la;
+    else delete req.body.lat;
+  }
+  if (req.body.lng !== undefined && req.body.lng !== "") {
+    const ln = parseFloat(req.body.lng);
+    if (!Number.isNaN(ln)) req.body.lng = ln;
+    else delete req.body.lng;
+  }
 
   const realEstate = await RealEstate.create(req.body);
 
@@ -90,6 +102,14 @@ const updatePropertyDetails = async (req, res) => {
     floors,
     facing,
     category,
+    lat,
+    lng,
+    location,
+    panorama,
+    panoramaPath,
+    contactPhone,
+    distanceFromSEAIT,
+    walkMins,
   } = req.body;
 
   if (
@@ -120,17 +140,40 @@ const updatePropertyDetails = async (req, res) => {
     );
   }
 
+  const patch = {
+    price,
+    description,
+    area,
+    floors,
+    facing,
+    category,
+    address: { streetName, city, state, country },
+  };
+
+  if (lat !== undefined && lat !== "") {
+    const la = parseFloat(lat);
+    if (!Number.isNaN(la)) patch.lat = la;
+  }
+  if (lng !== undefined && lng !== "") {
+    const ln = parseFloat(lng);
+    if (!Number.isNaN(ln)) patch.lng = ln;
+  }
+  if (location !== undefined) patch.location = location;
+  if (panorama !== undefined) patch.panorama = panorama;
+  if (panoramaPath !== undefined) patch.panoramaPath = panoramaPath;
+  if (contactPhone !== undefined) patch.contactPhone = contactPhone;
+  if (distanceFromSEAIT !== undefined && distanceFromSEAIT !== "") {
+    const d = parseFloat(distanceFromSEAIT);
+    if (!Number.isNaN(d)) patch.distanceFromSEAIT = d;
+  }
+  if (walkMins !== undefined && walkMins !== "") {
+    const w = parseInt(walkMins, 10);
+    if (!Number.isNaN(w)) patch.walkMins = w;
+  }
+
   const updatedRealEstate = await RealEstate.findOneAndUpdate(
     { slug },
-    {
-      price,
-      description,
-      area,
-      floors,
-      facing,
-      category,
-      address: { streetName, city, state, country },
-    },
+    patch,
     { new: true, runValidators: true }
   );
 

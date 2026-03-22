@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   clearAlert,
   stateClear,
-  verifyAccountOwner,
+  verifyAccount,
 } from "../features/auth/authSlice";
 
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -52,7 +52,7 @@ const VerifyEmailPage = () => {
       token: param.token,
     };
 
-    dispatch(verifyAccountOwner({ verifyInfo }));
+    dispatch(verifyAccount({ verifyInfo }));
   };
 
   return (

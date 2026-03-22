@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";
 import { getSingleRealEstate } from "../../features/realEstateTenant/realEstateTenantSlice";
@@ -18,14 +18,188 @@ import MailIcon from "@mui/icons-material/Mail";
 import { countries } from "../../utils/countryList";
 import countryToCurrency from "country-to-currency";
 
+// ✅ 360 VIEWER: Offline 360 photo viewer with Pannellum-like functionality
+const Viewer360 = {
+  isInitialized: false,
+  currentImageIndex: 0,
+  images: [],
+  isDragging: false,
+  startX: 0,
+  currentRotation: 0,
+  
+  init: (images, containerId) => {
+    Viewer360.images = images || [];
+    Viewer360.currentImageIndex = 0;
+    Viewer360.currentRotation = 0;
+    Viewer360.isInitialized = true;
+    
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Create 360 viewer container
+    const viewerContent = document.createElement('div');
+    viewerContent.id = 'viewer-360-content';
+    viewerContent.style.cssText = `
+      width: 100%;
+      height: 400px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #000;
+      cursor: grab;
+    `;
+    
+    // Create image display
+    const imageDisplay = document.createElement('img');
+    imageDisplay.id = 'viewer-360-image';
+    imageDisplay.style.cssText = `
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.1s ease-out;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+    `;
+    
+    // Add controls
+    const controls = document.createElement('div');
+    controls.style.cssText = `
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    `;
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '←';
+    prevBtn.style.cssText = `
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    `;
+    prevBtn.onclick = () => Viewer360.previousImage();
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '→';
+    nextBtn.style.cssText = `
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    `;
+    nextBtn.onclick = () => Viewer360.nextImage();
+    
+    // Image counter
+    const counter = document.createElement('span');
+    counter.id = 'viewer-360-counter';
+    counter.style.cssText = `
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    `;
+    counter.textContent = '1 / ' + Viewer360.images.length;
+    
+    controls.appendChild(prevBtn);
+    controls.appendChild(counter);
+    controls.appendChild(nextBtn);
+    
+    viewerContent.appendChild(imageDisplay);
+    viewerContent.appendChild(controls);
+    container.appendChild(viewerContent);
+    
+    // Load first image
+    if (Viewer360.images.length > 0) {
+      imageDisplay.src = Viewer360.images[0];
+    }
+    
+    // Add drag functionality for 360 rotation
+    Viewer360.addDragFunctionality(imageDisplay);
+  },
+  
+  addDragFunctionality: (element) => {
+    element.addEventListener('mousedown', (e) => {
+      Viewer360.isDragging = true;
+      Viewer360.startX = e.clientX;
+      element.style.cursor = 'grabbing';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!Viewer360.isDragging) return;
+      
+      const deltaX = e.clientX - Viewer360.startX;
+      Viewer360.currentRotation += deltaX * 0.5;
+      element.style.transform = `rotateY(${Viewer360.currentRotation}deg)`;
+      Viewer360.startX = e.clientX;
+    });
+    
+    document.addEventListener('mouseup', () => {
+      Viewer360.isDragging = false;
+      element.style.cursor = 'grab';
+    });
+  },
+  
+  previousImage: () => {
+    if (Viewer360.images.length === 0) return;
+    Viewer360.currentImageIndex = (Viewer360.currentImageIndex - 1 + Viewer360.images.length) % Viewer360.images.length;
+    Viewer360.updateImage();
+  },
+  
+  nextImage: () => {
+    if (Viewer360.images.length === 0) return;
+    Viewer360.currentImageIndex = (Viewer360.currentImageIndex + 1) % Viewer360.images.length;
+    Viewer360.updateImage();
+  },
+  
+  updateImage: () => {
+    const imageDisplay = document.getElementById('viewer-360-image');
+    const counter = document.getElementById('viewer-360-counter');
+    
+    if (imageDisplay && Viewer360.images[Viewer360.currentImageIndex]) {
+      imageDisplay.src = Viewer360.images[Viewer360.currentImageIndex];
+      Viewer360.currentRotation = 0;
+      imageDisplay.style.transform = 'rotateY(0deg)';
+    }
+    
+    if (counter) {
+      counter.textContent = `${Viewer360.currentImageIndex + 1} / ${Viewer360.images.length}`;
+    }
+  },
+  
+  destroy: () => {
+    const container = document.getElementById('viewer-360-container');
+    if (container) {
+      container.innerHTML = '';
+    }
+    Viewer360.isInitialized = false;
+  }
+};
+
 const RentalPropertyDetail = () => {
   const { realEstate, isLoading } = useSelector(
     (state) => state.realEstateTenant
   );
 
   const dispatch = useDispatch();
-
   const { slug } = useParams();
+  const [show360Viewer, setShow360Viewer] = useState(false); // 360 viewer state
+  const viewer360Ref = useRef(null); // Reference for 360 viewer container
 
   const currentCountry = countries.find(
     (country) => country.label === realEstate?.address?.country
@@ -35,6 +209,33 @@ const RentalPropertyDetail = () => {
   useEffect(() => {
     dispatch(getSingleRealEstate({ slug }));
   }, [slug, dispatch]);
+  
+  // ✅ 360 VIEWER: Initialize when shown
+  useEffect(() => {
+    if (show360Viewer && realEstate && viewer360Ref.current) {
+      // ✅ PANORAMA PATH: Use 360 image from database or fallback
+      const panoramaImages = [];
+      
+      if (realEstate.panoramaPath && realEstate.panoramaPath !== "") {
+        // Use panorama from database
+        panoramaImages.push(realEstate.panoramaPath);
+      } else if (realEstate.realEstateImages && realEstate.realEstateImages.length > 0) {
+        // Use regular property images as fallback
+        panoramaImages.push(...realEstate.realEstateImages);
+      } else {
+        // Use local fallback image
+        panoramaImages.push('/assets/default-360.jpg');
+      }
+      
+      Viewer360.init(panoramaImages, 'viewer-360-container');
+    } else if (!show360Viewer) {
+      Viewer360.destroy();
+    }
+    
+    return () => {
+      Viewer360.destroy();
+    };
+  }, [show360Viewer, realEstate?.panoramaPath, realEstate?.realEstateImages]);
 
   if (isLoading) return <PageLoading />;
 
@@ -48,7 +249,62 @@ const RentalPropertyDetail = () => {
           <h3 className="font-heading font-bold">Rental Property Detail</h3>
           <section className="flex flex-col gap-12 rounded-md md:flex-row">
             <div className="w-full md:w-2/3">
-              <ImageCarousal imageSources={realEstate?.realEstateImages} />
+              {/* ✅ EXPANDABLE 360 VIEWER: Conditional rendering */}
+              {show360Viewer ? (
+                <div className="w-full">
+                  <div 
+                    ref={viewer360Ref}
+                    id="viewer-360-container"
+                    style={{
+                      width: '100%',
+                      height: '400px',
+                      borderRadius: '8px',
+                      border: '2px solid #1976d2',
+                      backgroundColor: '#f5f5f5'
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      color: '#666',
+                      fontSize: '14px'
+                    }}>
+                      <span>🌐 Loading 360° Virtual Tour...</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <p className="text-sm text-gray-600">
+                      <strong>Instructions:</strong> Drag to rotate • Use arrows to navigate • Click and drag for 360° view
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <ImageCarousal imageSources={realEstate?.realEstateImages} />
+              )}
+              
+              {/* ✅ 360 VIRTUAL TOUR BUTTON */}
+              <div className="mt-4">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  onClick={() => setShow360Viewer(!show360Viewer)}
+                  sx={{
+                    backgroundColor: "#1976d2",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#1565c0",
+                    },
+                    marginBottom: 2,
+                    width: "100%",
+                  }}
+                  startIcon={<span>🌐</span>}
+                >
+                  {show360Viewer ? 'Back to Photos' : '360° Virtual Tour'}
+                </Button>
+              </div>
             </div>
             <div className="flex flex-col rounded-md gap-4">
               <div className="flex flex-col gap-2">

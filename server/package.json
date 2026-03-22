@@ -6,10 +6,13 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "server": "nodemon app --ignore client",
+    "server": "nodemon server.js",
     "client": "npm start --prefix ../client",
-    "dev": "concurrently --kill-others-on-fail \"npm run server\" \" npm run client\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently -k \"nodemon server.js\" \"npm run start --prefix ../client\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed:stayscout": "node scripts/seedStayScout.js",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:demo": "node scripts/seedStayScoutDemo.js"
   },
   "author": "Sonam Rinzin Gurung",
   "license": "ISC",
@@ -26,6 +29,7 @@
     "he": "^1.2.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
+    "mongodb": "4.1",
     "mongoose": "^6.8.0",
     "mongoose-slug-generator": "^1.0.4",
     "morgan": "^1.10.0",

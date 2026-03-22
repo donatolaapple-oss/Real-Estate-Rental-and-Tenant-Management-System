@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef, useCallback, useContext } from "react";
 import axiosFetch from "../utils/axiosCreate";
 import { ChatInput } from "../components";
-import { Link } from "react-router-dom";
 import { SocketContext } from "../utils/SocketContext";
 import { useDispatch } from "react-redux";
 import { addOwnerRecentMessage } from "../features/ownerUser/ownerUserSlice";
 import { addTenantRecentMessage } from "../features/tenantUser/tenantUserSlice";
 
 const ChatMessages = ({ chat, currentUser, fromTenant, handleCurrentChatChange }) => {
+  const chatRole = fromTenant ? "tenant" : "landlord";
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -20,7 +20,7 @@ const ChatMessages = ({ chat, currentUser, fromTenant, handleCurrentChatChange }
         setIsLoaded(false);
 
         const { data } = await axiosFetch.post(
-          `/chat/${fromTenant ? "tenant" : "owner"}/get-messages`,
+          `/chat/${chatRole}/get-messages`,
           {
             to: chatId,
           }
@@ -32,7 +32,7 @@ const ChatMessages = ({ chat, currentUser, fromTenant, handleCurrentChatChange }
         console.log(error);
       }
     },
-    [fromTenant]
+    [chatRole]
   );
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const ChatMessages = ({ chat, currentUser, fromTenant, handleCurrentChatChange }
   const handleSendMessage = async (msgInput) => {
     try {
       await axiosFetch.post(
-        `/chat/${fromTenant ? "tenant" : "owner"}/send-message`,
+        `/chat/${chatRole}/send-message`,
         {
           to: chat?._id,
           message: msgInput,
@@ -95,21 +95,16 @@ const ChatMessages = ({ chat, currentUser, fromTenant, handleCurrentChatChange }
         maxHeight: "500px",
       }}
     >
-      <Link
-        to={`${fromTenant ? "/tenant/owner-user" : "/owner/tenant-user"}/${chat?.slug
-          }`}
-      >
-        <div className="flex items-center gap-4 py-4 cursor-pointer">
-          <img
-            src={chat?.profileImage}
-            alt="pfp"
-            className="w-8 h-8 rounded-full object-cover md:w-12 md:h-12"
-          />
-          <p className="font-roboto  md:text-lg">
-            {chat?.firstName} {chat?.lastName}
-          </p>
-        </div>
-      </Link>
+      <div className="flex items-center gap-4 py-4 border-b border-slate-100">
+        <img
+          src={chat?.profileImage}
+          alt="pfp"
+          className="w-8 h-8 rounded-full object-cover md:w-12 md:h-12"
+        />
+        <p className="font-roboto md:text-lg">
+          {chat?.firstName} {chat?.lastName}
+        </p>
+      </div>
 
       <div className="overflow-auto">
         {chat && messages?.length === 0 && (

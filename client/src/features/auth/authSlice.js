@@ -3,32 +3,51 @@ import axiosFetch from "../../utils/axiosCreate";
 
 const user = localStorage.getItem("user");
 
-export const loginOwner = createAsyncThunk(
-  "loginOwner",
+export const loginLandlord = createAsyncThunk(
+  "loginLandlord",
   async ({ userInfo }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.post("/auth/login", userInfo);
-
-      // if account is verified, save user info to local storage
       if (data.accountStatus) {
-        localStorage.setItem("user", JSON.stringify(data.owner));
+        localStorage.setItem("user", JSON.stringify(data.landlord));
         localStorage.setItem("token", data.accessToken);
         localStorage.setItem("userType", data.userType);
         localStorage.removeItem("email");
-
-        // if account is not verified, save email to local storage
       } else if (!data.accountStatus) {
         localStorage.setItem("email", data.email);
       }
       return await data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data.msg);
+      const msg =
+        error.response?.data?.msg ||
+        error.message ||
+        (error.code === "ERR_NETWORK" ? "Cannot reach API — check server is running and URL in .env" : "Login failed");
+      return thunkAPI.rejectWithValue(msg);
     }
   }
 );
 
-export const registerOwner = createAsyncThunk(
-  "registerOwner",
+export const loginAdmin = createAsyncThunk(
+  "loginAdmin",
+  async ({ userInfo }, thunkAPI) => {
+    try {
+      const { data } = await axiosFetch.post("/auth/login", userInfo);
+      localStorage.setItem("user", JSON.stringify(data.admin));
+      localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("userType", data.userType);
+      return await data;
+    } catch (error) {
+      const msg =
+        error.response?.data?.msg ||
+        error.message ||
+        (error.code === "ERR_NETWORK" ? "Cannot reach API — check server is running and URL in .env" : "Login failed");
+      return thunkAPI.rejectWithValue(msg);
+    }
+  }
+);
+
+export const registerLandlord = createAsyncThunk(
+  "registerLandlord",
   async ({ formData }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.post("/auth/register", formData);
@@ -40,8 +59,8 @@ export const registerOwner = createAsyncThunk(
   }
 );
 
-export const verifyAccountOwner = createAsyncThunk(
-  "verifyAccountOwner",
+export const verifyAccount = createAsyncThunk(
+  "verifyAccount",
   async ({ verifyInfo }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.post(
@@ -87,7 +106,11 @@ export const loginTenant = createAsyncThunk(
       }
       return await data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data.msg);
+      const msg =
+        error.response?.data?.msg ||
+        error.message ||
+        (error.code === "ERR_NETWORK" ? "Cannot reach API — check server is running and URL in .env" : "Login failed");
+      return thunkAPI.rejectWithValue(msg);
     }
   }
 );
@@ -135,12 +158,13 @@ export const resetPassword = createAsyncThunk(
 export const logOut = createAsyncThunk("logOut", async (arg, thunkAPI) => {
   try {
     await axiosFetch.post("/auth/logout");
+  } catch (error) {
+    console.log(error);
+  } finally {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
     thunkAPI.dispatch(stateClear());
-  } catch (error) {
-    console.log(error);
   }
 });
 
@@ -177,48 +201,65 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginOwner.pending, (state) => {
+      .addCase(loginLandlord.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(loginOwner.fulfilled, (state, action) => {
+      .addCase(loginLandlord.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.owner;
+        state.user = action.payload.landlord;
         state.token = action.payload.accessToken;
         state.userType = action.payload.userType;
         state.accountStatus = action.payload.accountStatus;
         state.success = true;
       })
-      .addCase(loginOwner.rejected, (state, action) => {
+      .addCase(loginLandlord.rejected, (state, action) => {
         state.isLoading = false;
         state.errorFlag = true;
         state.errorMsg = action.payload;
         state.alertType = "error";
       })
-      .addCase(registerOwner.pending, (state) => {
+      .addCase(loginAdmin.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(registerOwner.fulfilled, (state, action) => {
+      .addCase(loginAdmin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.admin;
+        state.token = action.payload.accessToken;
+        state.userType = action.payload.userType;
+        state.accountStatus = true;
+        state.success = true;
+      })
+      .addCase(loginAdmin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errorFlag = true;
+        state.errorMsg = action.payload;
+        state.alertType = "error";
+      })
+      .addCase(registerLandlord.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(registerLandlord.fulfilled, (state, action) => {
         state.isLoading = false;
         state.userType = action.payload.userType;
         state.success = true;
       })
-      .addCase(registerOwner.rejected, (state, action) => {
+      .addCase(registerLandlord.rejected, (state, action) => {
         state.isLoading = false;
         state.errorFlag = true;
         state.errorMsg = action.payload;
         state.alertType = "error";
       })
-      .addCase(verifyAccountOwner.pending, (state) => {
+      .addCase(verifyAccount.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(verifyAccountOwner.fulfilled, (state, action) => {
+      .addCase(verifyAccount.fulfilled, (state, action) => {
         state.isLoading = false;
         state.errorFlag = true;
         state.alertType = "success";
         state.errorMsg = "Account verified successfully";
         state.success = true;
       })
-      .addCase(verifyAccountOwner.rejected, (state, action) => {
+      .addCase(verifyAccount.rejected, (state, action) => {
         state.isLoading = false;
         state.errorFlag = true;
         state.errorMsg = action.payload;

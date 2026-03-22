@@ -147,8 +147,19 @@ const getAllContacts = async (req, res) => {
   res.json({ contacts });
 };
 
+/** Minimal landlord profile for chat / messaging (by Mongo id) */
+const getLandlordPublicProfile = async (req, res) => {
+  const { id } = req.params;
+  const landlord = await OwnerUser.findById(id).select(
+    "firstName lastName profileImage slug _id phoneNumber"
+  );
+  if (!landlord) throw new NotFoundError("Landlord not found");
+  res.json({ landlord });
+};
+
 export {
   getSingleOwnerUser,
+  getLandlordPublicProfile,
   getSelfDetail,
   updateProfile,
   addContactToggle,

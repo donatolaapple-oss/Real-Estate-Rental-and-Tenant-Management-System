@@ -54,16 +54,16 @@ $ npm install
 - create a .env file and add the following variables:
 - generate secret keys for jwt tokens using online tools
 
-MONGO_URI= <your_mongo_uri>
+MONGO_URI= mongodb+srv://admin:<db_password>@cluster0.g04iuhe.mongodb.net/
 ACCESS_TOKEN_SECRET_OWNER= <your_access_token_secret_owner>
 ACCESS_TOKEN_SECRET_TENANT= <your_access_token_secret_tenant>
 REFRESH_TOKEN_SECRET_OWNER= <your_refresh_token_secret_owner>
 REFRESH_TOKEN_SECRET_TENANT= <your_refresh_token_secret_tenant>
 ACCESS_LIFETIME=15m
 REFRESH_LIFETIME=7d
-CLOUDINARY_CLOUD_NAME=<your_cloudinary_cloud_name>
-CLOUDINARY_API_KEY= <your_cloudinary_api_key>
-CLOUDINARY_API_SECRET= <your_cloudinary_api_secret>
+CLOUDINARY_CLOUD_NAME=Root
+CLOUDINARY_API_KEY= 631958735564997
+CLOUDINARY_API_SECRET= xqSdkWQhBX2bCNuBGG9XGdcuyc4
 RESET_PASSWORD_KEY= <your_reset_password_key>
 EMAIL_VERIFICATION_KEY= <your_email_verification_key>
 CLIENT_URL=http://localhost:3000

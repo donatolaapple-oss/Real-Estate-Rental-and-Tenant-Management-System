@@ -43,4 +43,9 @@ router.get("/owner/get-chats", authorizeOwnerUser, getChats);
  */
 router.get("/tenant/get-chats", authorizeTenantUser, getChats);
 
+/** Landlord alias (same as owner) */
+router.post("/landlord/send-message", authorizeOwnerUser, sendMessage);
+router.post("/landlord/get-messages", authorizeOwnerUser, getMessages);
+router.get("/landlord/get-chats", authorizeOwnerUser, getChats);
+
 export default router;

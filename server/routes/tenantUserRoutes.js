@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import {
   getSingleOwnerUser,
+  getLandlordPublicProfile,
   getSelfDetail,
   updateProfile,
   addContactToggle,
@@ -13,6 +14,9 @@ import {
  * @route GET /api/tenant/owner-user/:slug
  */
 router.get("/owner-user/:slug", getSingleOwnerUser);
+
+/** @route GET /api/tenant/landlord/:id */
+router.get("/landlord/:id", getLandlordPublicProfile);
 
 /**
  * @description Get the current user's details

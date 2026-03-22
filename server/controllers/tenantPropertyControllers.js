@@ -46,6 +46,81 @@ const getAllProperties = async (req, res) => {
   res.json({ allRealEstate, numberOfPages, totalRealEstates });
 };
 
+// ✅ CHATBOT: Property search for intelligent recommendations
+const chatbotPropertySearch = async (req, res) => {
+  try {
+    const { budget, bedrooms, location, category } = req.query;
+    
+    const queryObject = {
+      status: true, //only show available properties
+    };
+    
+    // Budget filtering
+    if (budget) {
+      queryObject.price = { $lte: parseFloat(budget) };
+    }
+    
+    // Bedroom filtering
+    if (bedrooms) {
+      queryObject.bedrooms = { $gte: parseInt(bedrooms) };
+    }
+    
+    // Location filtering
+    if (location) {
+      queryObject["address.city"] = { $regex: location, $options: "i" };
+    }
+    
+    // Category filtering
+    if (category && category !== "all") {
+      queryObject.category = category;
+    }
+    
+    // Search for matching properties
+    const properties = await RealEstate.find(queryObject)
+      .populate({
+        path: "propertyOwner",
+        select: "firstName lastName email phoneNumber profileImage",
+      })
+      .sort({ price: 1 }) // Sort by price (cheapest first)
+      .limit(5); // Limit to 5 results
+    
+    // If no exact matches, find closest alternatives
+    if (properties.length === 0 && budget) {
+      const closestProperties = await RealEstate.find({
+        status: true,
+        price: { $lte: parseFloat(budget) * 1.2 } // 20% above budget
+      })
+        .populate({
+          path: "propertyOwner",
+          select: "firstName lastName email phoneNumber profileImage",
+        })
+        .sort({ price: 1 })
+        .limit(3);
+      
+      return res.json({
+        properties: closestProperties,
+        exactMatch: false,
+        budget: parseFloat(budget),
+        message: `I don't have anything for ₱${budget}, but here are the closest matches`
+      });
+    }
+    
+    res.json({
+      properties,
+      exactMatch: true,
+      budget: budget ? parseFloat(budget) : null,
+      message: `Found ${properties.length} properties matching your criteria`
+    });
+    
+  } catch (error) {
+    console.error('Chatbot property search error:', error);
+    res.status(500).json({
+      error: 'Failed to search properties',
+      message: 'Please try again later'
+    });
+  }
+};
+
 /**
  * @description Get single property
  * @returns {object} realEstate
@@ -156,4 +231,5 @@ export {
   getSingleProperty,
   savePropertyToggle,
   getAllSavedProperties,
+  chatbotPropertySearch,
 };

@@ -11,7 +11,7 @@ import {
 } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  registerOwner,
+  registerLandlord,
   registerTenant,
   clearAlert,
   stateClear,
@@ -91,8 +91,9 @@ const Register = () => {
     }
     formData.append("dateOfBirth", moment(date).format("YYYY-MM-DD"));
 
-    if (param.role === "owner") {
-      dispatch(registerOwner({ formData }));
+    if (param.role === "landlord" || param.role === "owner") {
+      formData.set("role", "landlord");
+      dispatch(registerLandlord({ formData }));
     } else if (param.role === "tenant") {
       dispatch(registerTenant({ formData }));
     }
@@ -103,9 +104,9 @@ const Register = () => {
       <header className="flex m-1 shadow-sm">
         <Logo />
         <div className="flex flex-col justify-center ml-2">
-          <h5 className="font-display">Rent Manager</h5>
+          <h5 className="font-display">StayScout</h5>
           <p className="hidden text-xs md:block md:text-sm">
-            Find and Manage your rentals in one place
+            Register as tenant or landlord
           </p>
         </div>
       </header>

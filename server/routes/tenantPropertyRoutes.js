@@ -5,6 +5,7 @@ import {
   getSingleProperty,
   savePropertyToggle,
   getAllSavedProperties,
+  chatbotPropertySearch,
 } from "../controllers/tenantPropertyControllers.js";
 
 /**
@@ -30,5 +31,11 @@ router.patch("/save/:id", savePropertyToggle);
  * @route GET /api/tenant/real-estate/save/all
  */
 router.get("/saved/all", getAllSavedProperties);
+
+/**
+ * @description Chatbot property search
+ * @route GET /api/tenant/real-estate/chatbot/search
+ */
+router.get("/chatbot/search", chatbotPropertySearch);
 
 export default router;

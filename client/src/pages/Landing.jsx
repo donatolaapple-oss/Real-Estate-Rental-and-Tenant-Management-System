@@ -14,10 +14,14 @@ const Landing = () => {
     (store) => store.auth
   );
 
-  // if user is logged in, redirect to home page
   useEffect(() => {
-    if (user) {
-      navigate(`/${userType}`);
+    if (user && userType) {
+      const dash = {
+        admin: "/admin/dashboard",
+        tenant: "/tenant/dashboard",
+        landlord: "/landlord/dashboard",
+      };
+      navigate(dash[userType] || "/");
     }
   }, [user, navigate, userType]);
 
@@ -26,9 +30,9 @@ const Landing = () => {
       <header className="flex m-1 shadow-sm">
         <Logo />
         <div className="flex flex-col justify-center ml-2">
-          <h5 className="font-display">Rent Manager</h5>
+          <h5 className="font-display">StayScout</h5>
           <p className="hidden text-xs md:block md:text-sm">
-            Find and Manage your rentals in one place
+            AI boarding house finder · Tupi &amp; area
           </p>
         </div>
       </header>
@@ -65,9 +69,9 @@ const Landing = () => {
           <Button
             color="secondary"
             variant="outlined"
-            onClick={useCallback(() => navigate("/about"), [navigate])}
+            onClick={useCallback(() => navigate("/login/admin"), [navigate])}
           >
-            Learn More
+            Admin login
           </Button>
         </div>
         <div className="md:w-2/4">
@@ -86,7 +90,7 @@ const Landing = () => {
               <div className="flex justify-start mt-7">
                 <Button
                   onClick={useCallback(
-                    () => navigate("/login/owner"),
+                    () => navigate("/login/landlord"),
                     [navigate]
                   )}
                   variant="contained"
@@ -106,7 +110,7 @@ const Landing = () => {
 
                 <Button
                   onClick={useCallback(
-                    () => navigate("/register/owner"),
+                    () => navigate("/register/landlord"),
                     [navigate]
                   )}
                   variant="contained"

@@ -98,7 +98,44 @@ const RealEstateSchema = new mongoose.Schema(
       default: true,
     },
 
+    /** StayScout: map & discovery */
+    lat: { type: Number },
+    lng: { type: Number },
+    /** Optional km from SEAIT (overrides haversine when set) */
+    distanceFromSEAIT: { type: Number },
+    /** Optional walk time to SEAIT (minutes) */
+    walkMins: { type: Number },
+    /** Barangay / landmark label (e.g. Cebuano) */
+    location: { type: String, trim: true },
+    rating: { type: Number, min: 0, max: 5, default: 4 },
+    panorama: { type: String, trim: true },
+    reviews: [
+      {
+        text: { type: String, required: true, trim: true },
+        sentiment: {
+          joy: { type: Number, min: 0, max: 1, default: 0 },
+          anger: { type: Number, min: 0, max: 1, default: 0 },
+          satisfaction: { type: Number, min: 0, max: 1, default: 0 },
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    sentimentScore: { type: Number, min: 0, max: 1, default: 0.5 },
+    listingStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+    },
+    contactPhone: { type: String, trim: true },
+    viewCount: { type: Number, default: 0, min: 0 },
+
     realEstateImages: [Object],
+
+    // ✅ 360 VIRTUAL TOUR: Panorama path for 360° view
+    panoramaPath: {
+      type: String,
+      default: "", // Empty string means no 360 image uploaded
+    },
 
     propertyOwner: {
       type: mongoose.Types.ObjectId,
@@ -108,5 +145,7 @@ const RealEstateSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+RealEstateSchema.index({ lat: 1, lng: 1, sentimentScore: 1 });
 
 export default mongoose.model("RealEstate", RealEstateSchema);

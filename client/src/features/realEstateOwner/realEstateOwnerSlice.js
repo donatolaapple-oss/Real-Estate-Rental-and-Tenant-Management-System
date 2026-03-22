@@ -5,7 +5,7 @@ export const postRealEstate = createAsyncThunk(
   "postRealEstate",
   async ({ formData }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.post("/owner/real-estate", formData);
+      const { data } = await axiosFetch.post("/landlord/real-estate", formData);
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -17,7 +17,7 @@ export const getPersonalRealEstate = createAsyncThunk(
   "getPersonalRealEstate",
   async ({ page }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get(`/owner/real-estate?page=${page}`);
+      const { data } = await axiosFetch.get(`/landlord/real-estate?page=${page}`);
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -29,7 +29,7 @@ export const getRealEstateDetail = createAsyncThunk(
   "getRealEstateDetail",
   async ({ slug }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get(`/owner/real-estate/${slug}`);
+      const { data } = await axiosFetch.get(`/landlord/real-estate/${slug}`);
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -42,7 +42,7 @@ export const updateRealEstateDetail = createAsyncThunk(
   async ({ slug, formValues }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.patch(
-        `/owner/real-estate/update/${slug}`,
+        `/landlord/real-estate/update/${slug}`,
         formValues
       );
       return await data;
@@ -57,7 +57,7 @@ export const deleteProperty = createAsyncThunk(
   async ({ slug }, thunkAPI) => {
     try {
       const { data } = await axiosFetch.delete(
-        `/owner/real-estate/delete/${slug}`
+        `/landlord/real-estate/delete/${slug}`
       );
       return await data;
     } catch (error) {
@@ -103,6 +103,13 @@ const realEstateOwnerSlice = createSlice({
         state.alertFlag = true;
         state.alertMsg = "Property added successfully";
         state.alertType = "success";
+        
+        // ✅ FIX: Refresh property list after successful posting
+        if (state.allRealEstate && Array.isArray(state.allRealEstate)) {
+          state.allRealEstate = [action.payload.realEstate, ...state.allRealEstate];
+        } else {
+          state.allRealEstate = [action.payload.realEstate];
+        }
       })
       .addCase(postRealEstate.rejected, (state, action) => {
         state.isLoading = false;

@@ -102,11 +102,10 @@ OwnerUserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password); // return true if passwords match else false
 };
 
-// create JWT Access token for owner user authentication
+// create JWT Access token for landlord (legacy model: OwnerUser)
 OwnerUserSchema.methods.createAccessToken = function () {
-  // return JWT token with user id
   return jwt.sign(
-    { userId: this._id, userType: "owner" },
+    { userId: this._id, userType: "landlord" },
     process.env.ACCESS_TOKEN_SECRET_OWNER,
     {
       expiresIn: process.env.ACCESS_LIFETIME,
@@ -114,11 +113,9 @@ OwnerUserSchema.methods.createAccessToken = function () {
   );
 };
 
-// create JWT Refresh token for owner user authentication
 OwnerUserSchema.methods.createRefreshToken = function () {
-  // return JWT token with user id
   return jwt.sign(
-    { userId: this._id, userType: "owner" },
+    { userId: this._id, userType: "landlord" },
     process.env.REFRESH_TOKEN_SECRET_OWNER,
     {
       expiresIn: process.env.REFRESH_LIFETIME,

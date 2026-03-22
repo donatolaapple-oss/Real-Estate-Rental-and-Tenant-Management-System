@@ -5,7 +5,7 @@ export const getProfileDetails = createAsyncThunk(
   "getOwnerProfileDetails",
   async (arg, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get("/owner/profile");
+      const { data } = await axiosFetch.get("/landlord/profile");
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -17,7 +17,7 @@ export const updateProfile = createAsyncThunk(
   "updateProfile",
   async ({ formValues }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.patch("/owner/profile", formValues);
+      const { data } = await axiosFetch.patch("/landlord/profile", formValues);
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -30,7 +30,7 @@ export const getTenantUserDetails = createAsyncThunk(
   async ({ slug, email }, thunkAPI) => {
     try {
 
-      const { data } = await axiosFetch.get(`/owner/tenant-user`, {
+      const { data } = await axiosFetch.get(`/landlord/tenant-user`, {
         params: { email: email || undefined, slug: slug || undefined }
       });
       return await data;
@@ -44,7 +44,7 @@ export const addOrRemoveContact = createAsyncThunk(
   "addOrRemoveContact",
   async ({ id }, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.patch(`/owner/addContact/${id}`);
+      const { data } = await axiosFetch.patch(`/landlord/addContact/${id}`);
       localStorage.setItem("user", JSON.stringify(data.updatedUser));
       return await data;
     } catch (error) {
@@ -57,7 +57,7 @@ export const getAllContacts = createAsyncThunk(
   "getAllContacts",
   async ({ name }, thunkAPI) => {
     try {
-      let url = "/owner/contacts/all";
+      let url = "/landlord/contacts/all";
       if (name) {
         url = url + `?name=${name}`;
       }
@@ -97,7 +97,7 @@ export const getLeaseOwnerView = createAsyncThunk(
 
 export const updateLeaseToUnsigned = createAsyncThunk("updateLeaseToUnsigned", async ({ leaseId }, thunkAPI) => {
   try {
-    const { data } = await axiosFetch.patch(`/lease/owner/updateLeaseUnsigned/${leaseId}`);
+    const { data } = await axiosFetch.patch(`/lease/landlord/updateLeaseUnsigned/${leaseId}`);
     return await data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -131,7 +131,7 @@ export const getOwnerAllLeases = createAsyncThunk(
   "getOwnerAllLeases",
   async (arg, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get("/lease/owner/allLeases");
+      const { data } = await axiosFetch.get("/lease/landlord/allLeases");
       return await data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg);
@@ -143,7 +143,7 @@ export const getOwnerChats = createAsyncThunk(
   "getOwnerChats",
   async (arg, thunkAPI) => {
     try {
-      const { data } = await axiosFetch.get("/chat/owner/get-chats")
+      const { data } = await axiosFetch.get("/chat/landlord/get-chats")
       return await data
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.msg)

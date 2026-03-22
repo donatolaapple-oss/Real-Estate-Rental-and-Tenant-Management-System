@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAllRealEstate } from "../../features/realEstateTenant/realEstateTenantSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { RealEstateCard, Footer, SearchAndFilter } from "../../components";
+import { RealEstateCard, Footer, SearchAndFilter, TenantChatbot, ChatbotErrorBoundary } from "../../components";
 import { Pagination, CircularProgress } from "@mui/material";
 
 const Homepage = () => {
@@ -109,6 +109,9 @@ const Homepage = () => {
         className="flex justify-center mb-12"
       />
       <Footer />
+      <ChatbotErrorBoundary>
+        <TenantChatbot properties={allRealEstate || []} />
+      </ChatbotErrorBoundary>
     </>
   );
 };

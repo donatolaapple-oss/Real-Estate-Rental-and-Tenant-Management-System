@@ -22,7 +22,12 @@ axiosFetch.interceptors.request.use(
   }
 );
 
-const userType = localStorage.getItem("userType");
+function refreshSegment() {
+  const userType = localStorage.getItem("userType");
+  if (userType === "landlord" || userType === "owner") return "landlord";
+  if (userType === "admin") return "admin";
+  return "tenant";
+}
 
 axiosFetch.interceptors.response.use(
   (response) => {
@@ -39,7 +44,7 @@ axiosFetch.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const rs = await axiosFetch.get(`/auth/${userType}/refresh`);
+        const rs = await axiosFetch.get(`/auth/${refreshSegment()}/refresh`);
         localStorage.setItem("token", rs.data.accessToken);
         return axiosFetch(error.config);
       } catch (err) {

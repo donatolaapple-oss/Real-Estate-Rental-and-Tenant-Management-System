@@ -3,7 +3,8 @@ const router = express.Router();
 import {
   login,
   register,
-  refreshOwner,
+  refreshLandlord,
+  refreshAdmin,
   refreshTenant,
   logout,
   forgotPassword,
@@ -14,11 +15,13 @@ import {
 import upload from "../middleware/multerImageMiddleware.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
 
-/**
- * @description generate new access token for owner user
- * @route POST /api/auth/owner/refresh
- */
-router.get("/owner/refresh", refreshOwner);
+/** @route GET /api/auth/landlord/refresh */
+router.get("/landlord/refresh", refreshLandlord);
+/** @route GET /api/auth/owner/refresh — alias */
+router.get("/owner/refresh", refreshLandlord);
+
+/** @route GET /api/auth/admin/refresh */
+router.get("/admin/refresh", refreshAdmin);
 
 /**
  * @description generate new access token for tenant user
