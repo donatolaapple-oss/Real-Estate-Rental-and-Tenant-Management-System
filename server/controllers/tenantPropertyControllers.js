@@ -10,8 +10,11 @@ const getAllProperties = async (req, res) => {
   const { search, category, priceFilter } = req.query;
 
   const queryObject = {
-    status: true, //only show properties that are available
-    listingStatus: "approved", // align with map / StayScout tenant feed
+    status: true,
+    $or: [
+      { listingStatus: "approved" },
+      { listingStatus: { $exists: false } },
+    ],
   };
 
   if (search) {
@@ -54,7 +57,10 @@ const chatbotPropertySearch = async (req, res) => {
     
     const queryObject = {
       status: true,
-      listingStatus: "approved",
+      $or: [
+        { listingStatus: "approved" },
+        { listingStatus: { $exists: false } },
+      ],
     };
     
     // Budget filtering
